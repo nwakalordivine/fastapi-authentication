@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# dotenv
+.env
+.env.*
+
+# Python test output
+.pytest_cache/
+.coverage
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# PyCharm
+.idea/
+
+# node modules (if any frontend)
+node_modules/
+
+# lock files
+poetry.lock
+package-lock.json
+
+# local sqlite DB
+*.db
+
+# system files
+Thumbs.db
+
+# build artifacts
+__pycache__/
+*.pyc
+
+# cloudinary temp
+.cloudinary

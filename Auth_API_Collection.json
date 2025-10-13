@@ -1,0 +1,539 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+		"name": "Authentication Service API",
+		"description": {
+			"content": "A comprehensive Postman collection for testing the Authentication Service API. It covers user registration, JWT login, secure password reset, and Google OAuth2 flows.\n\n## Setup\n1. Make sure your FastAPI server is running.\n2. Ensure the `baseUrl` collection variable is set to your server's address (default: `http://127.0.0.1:8000`).",
+			"type": "text/markdown"
+		},
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Register New User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "username",
+									"value": "testuser_postman",
+									"type": "text",
+									"description": "A unique username for the new account."
+								},
+								{
+									"key": "email",
+									"value": "postman@example.com",
+									"type": "text",
+									"description": "The user's unique email address."
+								},
+								{
+									"key": "password",
+									"value": "strongpassword123",
+									"type": "text",
+									"description": "The user's password."
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"description": "(Optional) Select a file to upload as the user's avatar. To test without an avatar, simply uncheck this field.",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": {
+							"content": "Creates a new user account. This endpoint uses `multipart/form-data`.\n\n**How to Test:**\n1. Fill in the `username`, `email`, and `password` fields.\n2. To test with an avatar, click 'Select Files' for the `avatar` key and choose an image.\n3. To test without an avatar, simply uncheck the box next to the `avatar` key.\n4. Hit 'Send' to create the user.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created - User Registered Successfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"user\": {\n        \"username\": \"testuser_postman\",\n        \"email\": \"postman@example.com\",\n        \"avatar\": \"http://res.cloudinary.com/your-cloud/image/upload/v16.../fastapi_auth/avatars/testuser_postman_16...\"\n    },\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMCIsImV4cCI6MTc0MjQzNTE2OX0.abcdefg...\",\n    \"token_type\": \"bearer\"\n}"
+						},
+						{
+							"name": "400 Bad Request - User Exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"Username or email already exists\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login for Access Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "testuser_postman",
+									"type": "text",
+									"description": "The username of the user trying to log in."
+								},
+								{
+									"key": "password",
+									"value": "strongpassword123",
+									"type": "text",
+									"description": "The user's password."
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							]
+						},
+						"description": {
+							"content": "Authenticates a user with their username and password and returns a JWT.\n\nThis endpoint uses the standard OAuth2 password flow and expects `application/x-www-form-urlencoded` data.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Login Successful",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/token",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"token"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMCIsImV4cCI6MTc0MjQzNTgwMH0.hijklmn...\",\n    \"token_type\": \"bearer\"\n}"
+						},
+						{
+							"name": "401 Unauthorized - Incorrect Credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/token",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"token"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"Incorrect username or password\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Password Management",
+			"item": [
+				{
+					"name": "Forgot Password (Request OTP)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/forgot-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						},
+						"description": {
+							"content": "Initiates the password reset process by sending a 6-digit One-Time Password (OTP) to the specified email address, if an account exists.\n\nThis endpoint is rate-limited to 3 requests per hour per email.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Request Processed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"postman@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/forgot-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"forgot-password"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"message\": \"If an account with that email exists, a password reset code has been sent.\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Reset Password with OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"postman@example.com\",\n    \"otp\": \"123456\",\n    \"new_password\": \"mynewstrongpassword456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": {
+							"content": "Completes the password reset process.\n\n**How to Test:**\n1. First, use the 'Forgot Password' request to get an OTP sent to your email.\n2. Enter the email, the received OTP, and your desired new password in the request body.\n3. Send the request to update your password.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Password Reset Successfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"postman@example.com\",\n    \"otp\": \"123456\",\n    \"new_password\": \"mynewstrongpassword456\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/reset-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"reset-password"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Password has been reset successfully.\"\n}"
+						},
+						{
+							"name": "400 Bad Request - Invalid OTP",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/reset-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"reset-password"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"Invalid OTP.\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Google OAuth",
+			"description": "Handles the OAuth2 flow for signing in with Google.",
+			"item": [
+				{
+					"name": "STEP 1: Initiate Google Login (Browser)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/login/google",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login",
+								"google"
+							]
+						},
+						"description": {
+							"content": "This is the starting point for the Google OAuth2 flow. \n\n**IMPORTANT: DO NOT USE THE 'SEND' BUTTON.**\n\nThis request must be opened in a web browser. \n\n**How to Test:**\n1. Copy the full URL: `{{baseUrl}}/auth/login/google`\n2. Paste it into your browser's address bar and press Enter.\n3. You will be redirected to Google to sign in.\n4. After signing in, Google will redirect you to your frontend callback URL (`http://localhost:3000/auth/callback` by default).\n5. The frontend URL will contain a `code` parameter, like `?code=a1b2-c3d4-e5f6...`\n6. Copy this `code` value and use it in **STEP 2**.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "302 Found - Redirect to Google",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/auth/login/google",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login",
+										"google"
+									]
+								}
+							},
+							"status": "Found",
+							"code": 302,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "location",
+									"value": "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=..."
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "STEP 2: Exchange Code for JWT",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"PASTE_THE_CODE_FROM_THE_BROWSER_URL_HERE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/token/exchange",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"token",
+								"exchange"
+							]
+						},
+						"description": {
+							"content": "This is the final step in the OAuth flow. It securely exchanges the temporary, single-use `code` (obtained in STEP 1) for a valid JWT that can be used to authenticate with the API.",
+							"type": "text/markdown"
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK - Exchange Successful",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"...\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/token/exchange",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"token",
+										"exchange"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMSIsImV4cCI6MTc0MjQzNjQwOH0.opqrst...\",\n    \"token_type\": \"bearer\"\n}"
+						},
+						{
+							"name": "400 Bad Request - Invalid Code",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/token/exchange",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"token",
+										"exchange"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [],
+							"cookie": [],
+							"body": "{\n    \"detail\": \"Invalid or expired exchange code.\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000",
+			"type": "string",
+			"description": "The base URL for the API. Change this for different environments (e.g., staging, production)."
+		}
+	]
+}
