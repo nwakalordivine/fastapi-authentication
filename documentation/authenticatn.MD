@@ -114,37 +114,9 @@ curl -X POST "http://127.0.0.1:8000/auth/forgot-password" \
 - Body: `{ "code": "<exchange_code>" }` (JSON)
 - Returns: `{ "access_token": "<jwt>", "token_type": "bearer" }`
 
-Environment variables (key ones)
-
-- SQLALCHEMY_DATABASE_URL — database URL (sqlite example: sqlite:///./test.db)
-- UPSTASH_REDIS_URL and UPSTASH_REDIS_TOKEN — Upstash credentials (or REDIS_URL for redis protocol)
-- CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET — Cloudinary upload
-- GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET — Google OAuth credentials
-- FRONTEND_CALLBACK_URL — frontend URL that receives the OAuth exchange code (e.g. http://localhost:3000/oauth/callback)
-- MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM — SMTP settings for sending OTPs
-- MAIL_DEBUG=true (optional) — prints OTPs to console instead of sending email (dev)
-- SESSION_SECRET_KEY, SECRET_KEY — app secrets
-
-Local development notes
-
-- Use `MAIL_DEBUG=true` while developing so OTPs are printed to console.
-- The app exposes Swagger UI at `/docs` which can be used to exercise endpoints (multipart/form-data supported for file upload).
-- Redis health check runs at startup and prints status.
-
-Deployment
-
-- A basic `vercel.json` is included for simple Vercel deployments. For production consider using a persistent DB (not SQLite), secure env vars via the hosting provider, and an appropriate hosting target (Render/Heroku/Fly) if you need long-running processes and lower latency.
 
 Security notes
 
 - Passwords are hashed (bcrypt) before storage. Bcrypt has a 72-byte limit — ensure long passwords are handled consistently in client/server.
 - The password reset flow intentionally does not reveal whether an email is registered.
 - Limit OTP requests per email/IP to avoid abuse (rate limiting is recommended; a basic limiter is included).
-
-If you want I can:
-
-- Add example responses for each error case to the docs
-- Produce a short `README.md` with deployment steps for Vercel or Render
-- Generate a Postman collection or OpenAPI client snippets
-
-Done — this file is a concise, runnable reference. Want me to also commit a `README.md` and a Postman collection?
