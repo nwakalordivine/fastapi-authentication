@@ -2,7 +2,7 @@
 
 A comprehensive and secure authentication API built with FastAPI. This project provides a robust foundation for user management, including standard JWT authentication, Google OAuth2, a secure password reset flow, rate limiting, and optional avatar uploads.
 
-![Project Structure](https://i.imgur.com/your-image-url.png) ## ✨ Features
+![Project Structure](https://res.cloudinary.com/dfcon4lff/image/upload/v1760447187/fastapi_auth/avatars/user_postman_1760447187.png) ## ✨ Features
 
 - **JWT Authentication**: Secure token-based login using username and password.
 - **Google OAuth2**: Seamless "Sign in with Google" for both registration and login.
