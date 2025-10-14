@@ -1,6 +1,8 @@
 # Authentication API Documentation
 
 ---
+* **Base URL**: `https://fastapi-authentication.vercel.app`
+---
 ## Register New User
 
 * **URL**: `/auth/register`
