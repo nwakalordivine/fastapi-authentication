@@ -9,8 +9,8 @@ from starlette import status
 from app.database import get_db
 from app.models import Users
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from jose import jwt, JWTError
 from app.schemas import Token, CreateUserResponse, TokenExchangeRequest, ForgotPasswordRequest, ResetPasswordRequest
 from app.utils.redis_client import redis_client
 from app.utils.email_helper import generate_otp, send_otp_email
@@ -37,6 +37,7 @@ ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '60'))
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl='/auth/token')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt_context.verify(plain_password, hashed_password)
@@ -54,6 +55,40 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
+async def get_current_user(token: str = Depends(oauth2_bearer), db: Session = Depends(get_db)):
+    """
+    Decodes the JWT token to get the current user.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    user = db.query(Users).filter(Users.id == int(user_id)).first()
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_admin_user(current_user: Users = Depends(get_current_user)):
+    """
+    Checks if the current user is an admin. If not, raises a 403 Forbidden error.
+    This is a dependency for protecting admin-only routes.
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have administrative privileges"
+        )
+    return current_user
 
 
 @router.post(
@@ -130,14 +165,11 @@ async def register(
     db.refresh(user)
 
     access_token = create_access_token(data={"sub": str(user.id)})
-    return {"user": {
-        "username": user.username,
-        "email": user.email,
-        "avatar": user.avatar
-    },
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    
+    # --- THIS IS THE FIX ---
+    # Pass the SQLAlchemy user object directly. Pydantic will handle the conversion.
+    return {"user": user, "access_token": access_token, "token_type": "bearer"}
+
 
 @router.post(
     '/token',

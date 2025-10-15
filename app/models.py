@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 
 
 class Users(Base):
@@ -11,3 +11,4 @@ class Users(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String, nullable=True)
     google_id = Column(String, unique=True, nullable=True, index=True)
+    is_admin = Column(Boolean, default=False)

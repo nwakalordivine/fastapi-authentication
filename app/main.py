@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app import models
 from app.database import Base, engine
-from app.routes import auth
+from app.routes import auth, admin
 from app.utils.redis_client import test_redis_connection
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,6 +42,7 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)
+app.include_router(admin.router)
 
 
 @app.get('/', tags=["Root"], summary="API Root")

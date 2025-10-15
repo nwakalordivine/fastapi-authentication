@@ -18,9 +18,11 @@
     ```json
     {
         "user": {
+            "id": 1,
             "username": "newuser",
             "email": "user@example.com",
-            "avatar": "[http://res.cloudinary.com/](http://res.cloudinary.com/)..."
+            "avatar": "[http://res.cloudinary.com/](http://res.cloudinary.com/)...",
+            "is_admin": false
         },
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         "token_type": "bearer"
@@ -130,3 +132,158 @@
     ```
 * **Errors**:
     * `400`: The exchange code is invalid or has expired.
+
+---
+# Admin API Documentation
+**Note**: All endpoints in this section require an `Authorization: Bearer <ADMIN_TOKEN>` header.
+
+---
+## Get All Users
+
+* **URL**: `/admin/users`
+* **Method**: `GET`
+* **Header**:
+    ```json
+    {
+        "Authorization": "Bearer <ADMIN_TOKEN>"
+    }
+    ```
+* **Response**:
+    **200: List of all users**
+    ```json
+    [
+        {
+            "id": 1,
+            "username": "adminuser",
+            "email": "admin@example.com",
+            "avatar": null,
+            "is_admin": true
+        },
+        {
+            "id": 2,
+            "username": "normaluser",
+            "email": "user@example.com",
+            "avatar": null,
+            "is_admin": false
+        }
+    ]
+    ```
+* **Errors**:
+    * `401`: Unauthorized - Token is missing or invalid.
+    * `403`: Forbidden - User is not an admin.
+
+---
+## Get User by ID
+
+* **URL**: `/admin/users/{user_id}`
+* **Method**: `GET`
+* **Header**:
+    ```json
+    {
+        "Authorization": "Bearer <ADMIN_TOKEN>"
+    }
+    ```
+* **Path Parameter**:
+    * `user_id` (integer, required): The ID of the user to retrieve.
+* **Response**:
+    **200: User details retrieved successfully**
+    ```json
+    {
+        "id": 2,
+        "username": "normaluser",
+        "email": "user@example.com",
+        "avatar": null,
+        "is_admin": false
+    }
+    ```
+* **Errors**:
+    * `401`: Unauthorized - Token is missing or invalid.
+    * `403`: Forbidden - User is not an admin.
+    * `404`: User not found.
+
+---
+## Promote User to Admin
+
+* **URL**: `/admin/users/{user_id}/make-admin`
+* **Method**: `PUT`
+* **Header**:
+    ```json
+    {
+        "Authorization": "Bearer <ADMIN_TOKEN>"
+    }
+    ```
+* **Path Parameter**:
+    * `user_id` (integer, required): The ID of the user to promote.
+* **Response**:
+    **200: User promoted successfully**
+    ```json
+    {
+        "id": 2,
+        "username": "normaluser",
+        "email": "user@example.com",
+        "avatar": null,
+        "is_admin": true
+    }
+    ```
+* **Errors**:
+    * `401`: Unauthorized - Token is missing or invalid.
+    * `403`: Forbidden - User is not an admin.
+    * `404`: User not found.
+
+---
+## Update a User
+
+* **URL**: `/admin/users/{user_id}`
+* **Method**: `PUT`
+* **Content-Type**: `application/json`
+* **Header**:
+    ```json
+    {
+        "Authorization": "Bearer <ADMIN_TOKEN>"
+    }
+    ```
+* **Path Parameter**:
+    * `user_id` (integer, required): The ID of the user to update.
+* **Body**:
+    ```json
+    {
+        "username": "newusername",
+        "email": "newemail@example.com"
+    }
+    ```
+* **Response**:
+    **200: User updated successfully**
+    ```json
+    {
+        "id": 2,
+        "username": "newusername",
+        "email": "newemail@example.com",
+        "avatar": null,
+        "is_admin": false
+    }
+    ```
+* **Errors**:
+    * `401`: Unauthorized - Token is missing or invalid.
+    * `403`: Forbidden - User is not an admin.
+    * `404`: User not found.
+
+---
+## Delete a User
+
+* **URL**: `/admin/users/{user_id}`
+* **Method**: `DELETE`
+* **Header**:
+    ```json
+    {
+        "Authorization": "Bearer <ADMIN_TOKEN>"
+    }
+    ```
+* **Path Parameter**:
+    * `user_id` (integer, required): The ID of the user to delete.
+* **Response**:
+    **204: No Content** (Indicates successful deletion with no response body)
+* **Errors**:
+    * `401`: Unauthorized - Token is missing or invalid.
+    * `403`: Forbidden - User is not an admin.
+    * `404`: User not found.
+

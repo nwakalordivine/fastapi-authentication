@@ -1,10 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
-class CreateUserResponse(BaseModel):
-    user: Optional[dict]
-    access_token: str
-    token_type: str
 
 class Token(BaseModel):
     access_token: str
@@ -20,3 +16,27 @@ class ResetPasswordRequest(BaseModel):
 
 class TokenExchangeRequest(BaseModel):
     code: str
+
+class UserBase(BaseModel):
+    username: str
+    email: str
+    avatar: Optional[str] = None
+    is_admin: bool
+
+class UserCreate(UserBase):
+    password: str
+
+class User(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class CreateUserResponse(BaseModel):
+    user: User
+    access_token: str
+    token_type: str
+
+class UserUpdateRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None

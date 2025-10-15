@@ -6,11 +6,17 @@ import os
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = os.environ.get(
-    "SQLALCHEMY_DATABASE_URL", "sqlite:///./test.db"
+SQLALCHEMY_DATABASE_URL = os.environ.get("SQLALCHEMY_DATABASE_URL")
+
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,  
+    pool_recycle=300,
+    pool_size=5,
+    max_overflow=10
 )
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -23,3 +29,4 @@ def get_db():
         yield db
     finally:
         db.close()
+        

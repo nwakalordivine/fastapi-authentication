@@ -11,7 +11,7 @@ A comprehensive and secure authentication API built with FastAPI. This project p
 - **Optional Avatar Uploads**: Users can upload profile pictures to Cloudinary during registration.
 - **Interactive API Docs**: Automatic, detailed API documentation with Swagger UI and ReDoc.
 - **Cloud-Ready**: Designed to be deployed on serverless platforms like Vercel with a cloud database.
-
+- **Admin Authorization**: Role-based access control for administrative actions.
 ---
 
 ## 🚀 Getting Started
