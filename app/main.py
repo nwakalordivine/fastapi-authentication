@@ -23,6 +23,47 @@ A comprehensive Authentication API that supports:
 )
 
 
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    from fastapi.openapi.utils import get_openapi
+
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+
+    try:
+        token_path = openapi_schema['paths'].get('/auth/token')
+        if token_path and 'post' in token_path:
+            post_op = token_path['post']
+            post_op['requestBody'] = {
+                'content': {
+                    'application/x-www-form-urlencoded': {
+                        'schema': {
+                            'type': 'object',
+                            'properties': {
+                                'username': {'type': 'string', 'example': 'alice'},
+                                'password': {'type': 'string', 'format': 'password', 'example': 'hunter2'},
+                            },
+                            'required': ['username', 'password']
+                        }
+                    }
+                },
+                'required': True,
+            }
+    except Exception:
+        pass
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SESSION_SECRET_KEY"),
