@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
 from app.models import Users
-from app.schemas import User, UserUpdateRequest
+from app.schemas import User, UserUpdateRequest, AdminBlock
 from app.routes.auth import get_current_admin_user, get_password_hash
 
 router = APIRouter(
@@ -83,3 +83,22 @@ async def get_user_by_id(user_id: int, db: Session = Depends(get_db), admin: Use
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
+
+@router.put("/block-user/{user_id}", summary="Block a user from accessing", response_model=AdminBlock)
+async def block_user(user_id: int, db: Session = Depends(get_db), admin: Users = AdminDep):
+    """
+    Lets an admin set a users is_blocked bln field True or False
+    """
+    user = db.query(Users).filter(Users.id == user_id).first()
+    if user == admin:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin can't block self")
+    if user.is_blocked:
+        user.is_blocked = False
+        db.commit()
+        return {"user": user, "status": "unblocked"}
+    else:
+        user.is_blocked = True
+        db.commit()
+        return {"user": user, "status": "blocked"}
+
+    

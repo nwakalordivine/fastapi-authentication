@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File, R
 from sqlalchemy.orm import Session
 from starlette import status
 from app.database import get_db
-from app.models import Users
+from app.models import Users, UserPasswordsSet
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer, HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
@@ -30,6 +30,7 @@ from app.utils.rate_limiter import (
 router = APIRouter(
     prefix='/auth',
 )
+
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-me')
 ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
@@ -79,11 +80,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(b
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    
+
     user = db.query(Users).filter(Users.id == int(user_id)).first()
     if user is None:
         raise credentials_exception
     return user
+
 
 async def get_current_admin_user(current_user: Users = Depends(get_current_user)):
     """
@@ -134,17 +136,17 @@ async def get_current_admin_user(current_user: Users = Depends(get_current_user)
 )
 async def register(
     username: str = Form(
-        ..., 
-        description="The desired username for the new account.", 
+        ...,
+        description="The desired username for the new account.",
         example="newuser"
-        ),
+    ),
     email: str = Form(
-        ..., 
+        ...,
         description="The email address for the new account.",
         example="user@example.com"
     ),
     password: str = Form(
-        ..., 
+        ...,
         description="The password for the new account.",
         example="a_strong_password"
     ),
@@ -159,10 +161,10 @@ async def register(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Username or email already exists'
         )
-    
+
     avatar_url = None
 
-    if isinstance(avatar, UploadFile) and getattr(avatar, 'filename', None):
+    if hasattr(avatar, 'filename') and hasattr(avatar, 'read') and avatar.filename:
         try:
             contents = await avatar.read()
             public_id = f"avatars/{username}_{int(time.time())}"
@@ -170,6 +172,7 @@ async def register(
                 contents), public_id=public_id, resource_type='image', folder='fastapi_auth')
             avatar_url = result.get('secure_url')
         except Exception as e:
+            print(f"Error during Cloudinary upload: {e}")
             raise HTTPException(
                 status_code=500, detail=f'Failed uploading avatar: {e}')
 
@@ -221,6 +224,8 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                             detail="Account is locked due to too many failed login attempts. Please try again in 24 hours.")
     user = db.query(Users).filter(Users.username == form_data.username).first()
+    if user and user.is_blocked:
+        return {"access_token": "None: this user is blocked", "token_type": "bearer"}
     if not user or not user.hashed_password or not verify_password(form_data.password, user.hashed_password):
         if user:
             record_failed_login_attempt(form_data.username)
@@ -285,9 +290,30 @@ async def reset_password(request: ResetPasswordRequest, db: Session = Depends(ge
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-    user.hashed_password = get_password_hash(request.new_password)
+
+    new_plain = request.new_password
+
+    if user.hashed_password and verify_password(new_plain, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="New password must be different from the current password.")
+
+    pass_set = db.query(UserPasswordsSet).filter(
+        UserPasswordsSet.user_id == user.id).first()
+    if pass_set and pass_set.old_hashed_password and verify_password(new_plain, pass_set.old_hashed_password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="New password must be different from the previously used password.")
+
+    current_hash = user.hashed_password
+    if not pass_set:
+        pass_set = UserPasswordsSet(
+            user_id=user.id, old_hashed_password=current_hash)
+        db.add(pass_set)
+    else:
+        pass_set.old_hashed_password = current_hash
+
+    user.hashed_password = get_password_hash(new_plain)
     db.add(user)
     db.commit()
+    db.refresh(user)
+
     redis_client.delete(redis_key)
     return {"message": "Password has been reset successfully."}
 
@@ -333,6 +359,8 @@ async def auth_google(request: Request, db: Session = Depends(get_db)):
         email = info.get('email')
         user = db_session.query(Users).filter(
             Users.google_id == google_id).first()
+        if user and user.is_blocked:
+            return {"access_token": "None: this user is blocked", "token_type": "bearer"}
         if user:
             return create_access_token(data={"sub": str(user.id)})
         user = db_session.query(Users).filter(Users.email == email).first()

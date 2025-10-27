@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app import models
 from app.database import Base, engine
-from app.routes import auth, admin
+from app.routes import auth, admin, profile
 from app.utils.redis_client import test_redis_connection
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,14 +10,14 @@ import os
 app = FastAPI(
     title="Authentication Service API",
     description="""
-A comprehensive Authentication API that supports:
+        A comprehensive Authentication API that supports:
 
-- **User Registration**: Create accounts with username, email, and password.
-- **JWT Authentication**: Standard token-based login.
-- **Google OAuth2**: Sign in and register with a Google account.
-- **Secure Password Reset**: A Forgot/Reset password flow using email and Redis.
-- **Rate Limiting**: Protection against brute-force attacks on login and password reset.
-- **Optional Avatar Uploads**: Users can upload profile pictures to Cloudinary.
+        - **User Registration**: Create accounts with username, email, and password.
+        - **JWT Authentication**: Standard token-based login.
+        - **Google OAuth2**: Sign in and register with a Google account.
+        - **Secure Password Reset**: A Forgot/Reset password flow using email and Redis.
+        - **Rate Limiting**: Protection against brute-force attacks on login and password reset.
+        - **Optional Avatar Uploads**: Users can upload profile pictures to Cloudinary.
     """,
     version="1.0.0",
 )
@@ -84,7 +84,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)
 app.include_router(admin.router)
-
+app.include_router(profile.router)
 
 @app.get('/', tags=["Root"], summary="API Root")
 def root():

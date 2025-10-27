@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 
 
 class Token(BaseModel):
@@ -22,6 +22,7 @@ class UserBase(BaseModel):
     email: str
     avatar: Optional[str] = None
     is_admin: bool
+    is_blocked: bool
 
 class UserCreate(UserBase):
     password: str
@@ -40,3 +41,7 @@ class CreateUserResponse(BaseModel):
 class UserUpdateRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
+
+class AdminBlock(BaseModel):
+    user: User
+    status: str
