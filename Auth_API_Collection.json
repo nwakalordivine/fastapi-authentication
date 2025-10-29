@@ -1,167 +1,205 @@
 {
-	"info": {
-		"_postman_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-		"name": "Authentication Service API",
-		"description": {
-			"content": "A comprehensive Postman collection for testing the Authentication Service API. It covers user registration, JWT login, secure password reset, Google OAuth2, and Admin user management.\n\n## Setup\n1. Make sure your FastAPI server is running.\n2. Ensure the `baseUrl` collection variable is set to your server's address (default: `http://127.0.0.1:8000`).",
-			"type": "text/markdown"
-		},
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "User Management",
-			"item": [
-				{
-					"name": "Register New User",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{ "key": "username", "value": "testuser_postman", "type": "text" },
-								{ "key": "email", "value": "postman@example.com", "type": "text" },
-								{ "key": "password", "value": "strongpassword123", "type": "text" },
-								{ "key": "avatar", "type": "file", "src": [] }
-							]
-						},
-						"url": { "raw": "{{baseUrl}}/auth/register", "host": [ "{{baseUrl}}" ], "path": [ "auth", "register" ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Login for Access Token",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{ "key": "username", "value": "testuser_postman", "type": "text" },
-								{ "key": "password", "value": "strongpassword123", "type": "text" }
-							]
-						},
-						"url": { "raw": "{{baseUrl}}/auth/token", "host": [ "{{baseUrl}}" ], "path": [ "auth", "token" ] }
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Password Management",
-			"item": [
-				{
-					"name": "Forgot Password (Request OTP)",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": { "mode": "raw", "raw": "{\n    \"email\": \"postman@example.com\"\n}", "options": { "raw": { "language": "json" } } },
-						"url": { "raw": "{{baseUrl}}/auth/forgot-password", "host": [ "{{baseUrl}}" ], "path": [ "auth", "forgot-password" ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Password with OTP",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": { "mode": "raw", "raw": "{\n    \"email\": \"postman@example.com\",\n    \"otp\": \"123456\",\n    \"new_password\": \"mynewstrongpassword456\"\n}", "options": { "raw": { "language": "json" } } },
-						"url": { "raw": "{{baseUrl}}/auth/reset-password", "host": [ "{{baseUrl}}" ], "path": [ "auth", "reset-password" ] }
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Google OAuth",
-			"item": [
-				{
-					"name": "STEP 1: Initiate Google Login (Browser)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": { "raw": "{{baseUrl}}/auth/login/google", "host": [ "{{baseUrl}}" ], "path": [ "auth", "login", "google" ] },
-						"description": "This must be opened in a web browser. Copy `{{baseUrl}}/auth/login/google`, paste into your browser, and sign in. Copy the `code` from the redirect URL for Step 2."
-					},
-					"response": []
-				},
-				{
-					"name": "STEP 2: Exchange Code for JWT",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": { "mode": "raw", "raw": "{\n    \"code\": \"PASTE_THE_CODE_FROM_THE_BROWSER_URL_HERE\"\n}", "options": { "raw": { "language": "json" } } },
-						"url": { "raw": "{{baseUrl}}/auth/token/exchange", "host": [ "{{baseUrl}}" ], "path": [ "auth", "token", "exchange" ] }
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Admin Management",
-			"description": "Endpoints for administrative actions. Requires an admin-level JWT.\n\n**How to Test:**\n1. Log in as an admin user via the `/auth/token` endpoint.\n2. Copy the `access_token`.\n3. For each request in this folder, go to the 'Authorization' tab, select 'Bearer Token', and paste the token.",
-			"item": [
-				{
-					"name": "Get All Users",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": { "raw": "{{baseUrl}}/admin/users", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users" ] },
-						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Get User by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": { "raw": "{{baseUrl}}/admin/users/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "1" ] },
-						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Promote User to Admin",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": { "raw": "{{baseUrl}}/admin/users/2/make-admin", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2", "make-admin" ] },
-						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Update a User",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": { "mode": "raw", "raw": "{\n    \"username\": \"updated_username\",\n    \"email\": \"updated_email@example.com\"\n}", "options": { "raw": { "language": "json" } } },
-						"url": { "raw": "{{baseUrl}}/admin/users/2", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2" ] },
-						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a User",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": { "raw": "{{baseUrl}}/admin/users/2", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2" ] },
-						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://127.0.0.1:8000",
-			"type": "string",
-			"description": "The base URL for the API. Change this for different environments (e.g., staging, production)."
-		}
-	]
+    "info": {
+        "name": "Auth API Collection",
+        "_postman_id": "00000000-0000-0000-0000-000000000000",
+        "description": "Collection for testing the authentication API (register, login, profile, admin).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                { "key": "username", "value": "newuser", "type": "text" },
+                                { "key": "email", "value": "newuser@example.com", "type": "text" },
+                                { "key": "password", "value": "strongpassword123", "type": "text" },
+                                { "key": "avatar", "type": "file", "src": [] }
+                            ]
+                        },
+                        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login for Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                { "key": "username", "value": "newuser", "type": "text" },
+                                { "key": "password", "value": "strongpassword123", "type": "text" }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/token",
+                            "host": [ "{{baseUrl}}" ],
+                            "path": [ "auth", "token" ]
+                        },
+                        "description": "Log in with a username and password to receive an access token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/me",
+                            "host": [ "{{baseUrl}}" ],
+                            "path": [ "me" ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "PASTE_USER_TOKEN_HERE",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update My Profile",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                { "key": "username", "value": "newname", "type": "text" },
+                                { "key": "email", "value": "newemail@example.com", "type": "text" },
+                                { "key": "avatar", "type": "file", "src": [] }
+                            ]
+                        },
+                        "url": { "raw": "{{baseUrl}}/me", "host": [ "{{baseUrl}}" ], "path": [ "me" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_USER_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset Password with OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": { "mode": "raw", "raw": "{\n    \"email\": \"postman@example.com\",\n    \"otp\": \"123456\",\n    \"new_password\": \"mynewstrongpassword456\"\n}", "options": { "raw": { "language": "json" } } },
+                        "url": { "raw": "{{baseUrl}}/auth/reset-password", "host": [ "{{baseUrl}}" ], "path": [ "auth", "reset-password" ] }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Google OAuth",
+            "item": [
+                {
+                    "name": "STEP 1: Initiate Google Login (Browser)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/auth/login/google", "host": [ "{{baseUrl}}" ], "path": [ "auth", "login", "google" ] },
+                        "description": "This must be opened in a web browser. Copy `{{baseUrl}}/auth/login/google`, paste into your browser, and sign in. Copy the `code` from the redirect URL for Step 2."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "STEP 2: Exchange Code for JWT",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": { "mode": "raw", "raw": "{\n    \"code\": \"PASTE_THE_CODE_FROM_THE_BROWSER_URL_HERE\"\n}", "options": { "raw": { "language": "json" } } },
+                        "url": { "raw": "{{baseUrl}}/auth/token/exchange", "host": [ "{{baseUrl}}" ], "path": [ "auth", "token", "exchange" ] }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin Management",
+            "description": "Endpoints for administrative actions. Requires an admin-level JWT.\n\n**How to Test:**\n1. Log in as an admin user via the `/auth/token` endpoint.\n2. Copy the `access_token`.\n3. For each request in this folder, go to the 'Authorization' tab, select 'Bearer Token', and paste the token.",
+            "item": [
+                {
+                    "name": "Get All Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/admin/users", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/admin/users/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "1" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Promote User to Admin",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/admin/users/2/make-admin", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2", "make-admin" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update a User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "body": { "mode": "raw", "raw": "{\n    \"username\": \"updated_username\",\n    \"email\": \"updated_email@example.com\"\n}", "options": { "raw": { "language": "json" } } },
+                        "url": { "raw": "{{baseUrl}}/admin/users/2", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete a User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/admin/users/2", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "2" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Block / Unblock User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "url": { "raw": "{{baseUrl}}/admin/block-user/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "block-user", "1" ] },
+                        "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "PASTE_ADMIN_TOKEN_HERE", "type": "string" } ] }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://127.0.0.1:8000",
+            "type": "string",
+            "description": "The base URL for the API. Change this for different environments (e.g., staging, production)."
+        }
+    ]
 }
